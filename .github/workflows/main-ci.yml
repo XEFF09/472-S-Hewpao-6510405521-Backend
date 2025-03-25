@@ -83,6 +83,8 @@ jobs:
           git tag $NEW_TAG
           git push origin $NEW_TAG
 
+          echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
+
       - name: "Create GitHub Release"
         uses: comnoco/create-release-action@v2.0.5
         env:
