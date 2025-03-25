@@ -30,6 +30,8 @@ jobs:
   build:
     name: "Build & Push Docker Image"
     runs-on: "ubuntu-latest"
+    outputs:
+      tag: ${{ steps.versioning.outputs.NEW_TAG }}
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v4"
@@ -53,7 +55,7 @@ jobs:
             NEW_TAG="v${VERSION_PARTS[0]}.$((VERSION_PARTS[1] + 1)).0"
           fi
 
-          echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
+          echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_OUTPUT
 
       - name: "Build and Push Docker Image"
         run: |-
@@ -66,6 +68,8 @@ jobs:
     name: "Create GitHub Release"
     needs: build
     runs-on: "ubuntu-latest"
+    env:
+      NEW_TAG: ${{ needs.build.outputs.NEW_TAG }}
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v4"
@@ -75,8 +79,8 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          git tag "${NEW_TAG}"
-          git push origin "${NEW_TAG}"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
 
       - name: "Create GitHub Release"
         uses: actions/create-release@v1
